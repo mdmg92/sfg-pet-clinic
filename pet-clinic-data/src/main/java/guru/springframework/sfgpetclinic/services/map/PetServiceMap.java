@@ -2,12 +2,20 @@ package guru.springframework.sfgpetclinic.services.map;
 
 import guru.springframework.sfgpetclinic.model.Pet;
 import guru.springframework.sfgpetclinic.services.CrudService;
+import guru.springframework.sfgpetclinic.services.PetService;
+import guru.springframework.sfgpetclinic.services.PetTypeService;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
 
 @Service
-public class PetServiceMap extends AbstractMapService<Pet, Long> implements CrudService<Pet, Long> {
+public class PetServiceMap extends AbstractMapService<Pet, Long> implements PetService {
+
+    private PetTypeService petTypeService;
+
+    public PetServiceMap(PetTypeService petTypeService) {
+        this.petTypeService = petTypeService;
+    }
 
     @Override
     public Set<Pet> findAll() {
@@ -26,6 +34,15 @@ public class PetServiceMap extends AbstractMapService<Pet, Long> implements Crud
 
     @Override
     public Pet save(Pet object) {
+
+        if (object.getPetType() == null) {
+            throw new RuntimeException("Pet type is required");
+        }
+
+        if (object.getPetType().getId() == null) {
+            object.setPetType(petTypeService.save(object.getPetType()));
+        }
+
         return super.save(object);
     }
 
